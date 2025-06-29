@@ -2,24 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
+use App\Models\Image;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class ItemController extends Controller
+class ImageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Item $items, Request $request)
+    public function index()
     {
-        if ($request->isNotFilled("per_page")) {
-            return Inertia::render('admin/item/items');
-        } else {
-            return $items::with(["user" => function ($query) {
-                return $query->select("id", "name");
-            }])->paginate($request->query("per_page", 10));
-        }
+        //
     }
 
     /**
@@ -41,27 +34,23 @@ class ItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Item $items, string $id)
+    public function show(Image $image)
     {
         //
-
-        return $items::get($id);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Item $item)
+    public function edit(Image $image)
     {
         //
-           return Inertia::render('admin/item/edit');
-       
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Item $items, Request $request, string $id)
+    public function update(Request $request, Image $image)
     {
         //
     }
@@ -69,7 +58,7 @@ class ItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Image $image)
     {
         //
     }

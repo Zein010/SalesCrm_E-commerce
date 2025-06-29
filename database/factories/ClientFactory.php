@@ -19,10 +19,12 @@ class ClientFactory extends Factory
      */
     public function definition(): array
     {
+      
         return [
-            "first_name" => fake()->name(),
-            "last_name" => fake()->name(),
-            "email" => fake()->email(),
+            "first_name" => fake()->firstName(),
+            "last_name" => fake()->lastName(),
+            "email" =>fake()->email(),
+            
             "phone" => fake()->phoneNumber(),
             "username" => fake()->userName(),
             "password" => Hash::make('password')

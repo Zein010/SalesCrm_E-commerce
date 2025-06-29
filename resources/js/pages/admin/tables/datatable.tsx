@@ -1,22 +1,34 @@
 "use client"
 
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Row, useReactTable, VisibilityState } from "@tanstack/react-table"
-import { ArrowUpDown, Biohazard, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, Biohazard, ChevronDown, ChevronLast, ChevronLeft, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
+
+
+import axios from "@/lib/axios";
+import { Link } from "@inertiajs/react"
 
 
 
 
+export default function Datatable({ config }: { config: { columnConf: any, url: string, addUrl?: string, addSetState?: any } }) {
+  const [paginationParam, setPaginationParam] = useState<{ page: number, per_page: number }>({ page: 1, per_page: 10 });
 
-
-
-
-export default function DataTableDemo({ config }: { config: { columnConf: any, data: any[] } }) {
+  const [data, setData] = useState({ data: [], last_page: 0, total: 0 });
+  useEffect(() => {
+    axios.get(config.url, { params: { ...paginationParam } })
+      .then(response => {
+        setData(response.data)
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error)
+      })
+  }, [paginationParam])
 
   const [columnFilterOptions, setColumnFilterOptions] = useState<null | { friendlyName: string, value: string }[]>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -31,10 +43,11 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const columns: ColumnDef<unknown, any>[] = config.columnConf.map((column: { header: ReactNode, headerFormatter: Function | null, currency: boolean | null, formatter: Function | null, selectable: boolean | null, name: string, friendlyName: string, filterOptions: [] | null }) => {
+  const columns: ColumnDef<unknown, any>[] = config.columnConf.map((column: { datetime: boolean | null, header: ReactNode, headerFormatter: Function | null, currency: boolean | null, formatter: Function | null, selectable: boolean | null, name: string, friendlyName: string, filterOptions: [] | null }) => {
     if (column.selectable) {
       return {
-        id: "select",
+        accessorKey: column.name,
+        id: column.name,
         header: ({ table }: { table: any }) => (
           <Checkbox
             checked={
@@ -61,8 +74,8 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
         header: column.friendlyName,
       }
       if (column.formatter) {
-        columnConf.cell = ({ row }: { row: Row<unknown> }) => {
-          return column.formatter!(row.getValue(column.name))
+        columnConf.cell = ({ row }: any) => {
+          return column.formatter!(row)
         }
       } else if (column.currency) {
         columnConf.cell = ({ row }: { row: Row<unknown> }) => {
@@ -76,6 +89,9 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
 
           return <div className="text-right font-medium">{formatted}</div>
         }
+      } else if (column.datetime) {
+        columnConf.cell = ({ row }: { row: Row<unknown> }) => { return (row.getValue(column.name) as string).split(".")[0].replace("T", " ") }
+
       }
       if (column.header) {
         columnConf.header = column.header
@@ -121,19 +137,20 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
 
 
   const table = useReactTable({
-    data: config.data,
+    data: data.data,
     columns,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    manualPagination: true,
     state: {
       columnFilters,
       globalFilter,
       columnVisibility,
+
       rowSelection,
     },
   })
@@ -178,12 +195,12 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
   }
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex justify-between pb-4">
         <div className="flex gap-2">
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">{filterField.friendlyName}</Button>
+              <Button variant="outline">{filterField.friendlyName} <ChevronDown /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent >
               <DropdownMenuLabel>Filter Options</DropdownMenuLabel>
@@ -197,7 +214,7 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
           {columnFilterOptions ?
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">{columnFilterOptions.filter(option => option.value == columnFilter)[0].friendlyName}</Button>
+                <Button variant="outline">{columnFilterOptions.filter(option => option.value == columnFilter)[0].friendlyName} <ChevronDown /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent >
                 <DropdownMenuLabel>{filterField.friendlyName} Options</DropdownMenuLabel>
@@ -221,33 +238,40 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
             />}
 
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+        <div className="flex gap-1">
+          {
+
+            config.addUrl ? <Link href={config.addUrl}>
+              <Button variant="outline">Add New</Button>
+            </Link> : (config.addSetState ? <Button onClick={() => config.addSetState(true)} variant="outline">Add New</Button> : "")
+          }
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div></div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -300,23 +324,56 @@ export default function DataTableDemo({ config }: { config: { columnConf: any, d
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <div className="space-x-2">
+        <div className="flex gap-1 item-stretch">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">Show: {paginationParam.per_page} <ChevronDown /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent >
+              <DropdownMenuLabel>Per Page:</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={paginationParam.per_page.toString()} onValueChange={(value: string) => { setPaginationParam({ page: 1, per_page: parseInt(value) }) }}>
+
+                <DropdownMenuRadioItem value="5">5</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="10">10</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="50">50</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="100">100</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="500">500</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="1000">1000</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => setPaginationParam((old) => ({ per_page: old.per_page, page: old.page - 1 }))}
+            disabled={paginationParam.page == 1}
           >
             Previous
           </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={data.total < paginationParam.per_page} variant="outline">Page: {paginationParam.page} <ChevronDown /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent >
+              <DropdownMenuLabel>Page:</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={paginationParam.page.toString()} onValueChange={(value: string) => { setPaginationParam((old) => ({ page: parseInt(value), per_page: old.per_page })) }}>
+                {Array.from({ length: data.last_page }, (_, i) => i + 1).map((i) => {
+
+                  return <DropdownMenuRadioItem value={i.toString()}>{i}</DropdownMenuRadioItem>
+                })}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+
+            onClick={() => setPaginationParam((old) => ({ per_page: old.per_page, page: old.page + 1 }))}
+
+            disabled={paginationParam.page == data.last_page}
           >
             Next
           </Button>

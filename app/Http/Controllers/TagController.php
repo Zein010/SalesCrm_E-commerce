@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ItemController extends Controller
+class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Item $items, Request $request)
+    public function index(Request $request, Tag $tags)
     {
-        if ($request->isNotFilled("per_page")) {
-            return Inertia::render('admin/item/items');
-        } else {
-            return $items::with(["user" => function ($query) {
-                return $query->select("id", "name");
-            }])->paginate($request->query("per_page", 10));
-        }
-    }
 
+        if ($request->isNotFilled("per_page")) {
+            return Inertia::render('admin/tag/tags');
+        } else {
+            return  $tags->paginate($request->query("per_page", 10));
+        }
+        //
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -36,32 +35,34 @@ class ItemController extends Controller
     public function store(Request $request)
     {
         //
+
+        $validated = $request->validate(["name" => "Required|regex:/^[a-zA-Z0-9_]+$/", "description" => "required",], ["name.regex" => "The name field must contain letters, numbers and _ only"]);
+        $validated["user_id"] = $request->user()->id;
+        Tag::create($validated);
+        return redirect(route("tags.index"))->with('success', 'tag created successfully!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Item $items, string $id)
+    public function show(Tag $tag)
     {
         //
-
-        return $items::get($id);
+        return $tag;
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Item $item)
+    public function edit(string $id)
     {
         //
-           return Inertia::render('admin/item/edit');
-       
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Item $items, Request $request, string $id)
+    public function update(Request $request, string $id)
     {
         //
     }

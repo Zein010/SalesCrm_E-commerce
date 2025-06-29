@@ -2,24 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
+use App\Models\Comment;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class ItemController extends Controller
+class CommentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Item $items, Request $request)
+
+    public function index(Request $request, Comment $comments)
     {
-        if ($request->isNotFilled("per_page")) {
-            return Inertia::render('admin/item/items');
-        } else {
-            return $items::with(["user" => function ($query) {
-                return $query->select("id", "name");
-            }])->paginate($request->query("per_page", 10));
-        }
+        return $comments::with(["item" => function ($query) {
+            return $query->select("id", "name");
+        }])->where(["client_id" => $request->query("client_id")])->paginate($request->query("per_page"));
     }
 
     /**
@@ -41,27 +37,23 @@ class ItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Item $items, string $id)
+    public function show(string $id)
     {
         //
-
-        return $items::get($id);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Item $item)
+    public function edit(string $id)
     {
         //
-           return Inertia::render('admin/item/edit');
-       
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Item $items, Request $request, string $id)
+    public function update(Request $request, string $id)
     {
         //
     }

@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Client extends Model
 {
-      use HasFactory;
+
+    use HasFactory;
     //
+    protected $fillable = ["first_name", "last_name", "email", "username", "password", "phone"];
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
