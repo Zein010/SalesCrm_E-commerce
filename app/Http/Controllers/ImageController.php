@@ -4,15 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Image;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Intervention\Image\ImageManager;
 
 class ImageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, Image $images)
     {
         //
+        if ($request->filled("total")) {
+            return ["data" => $images->orderBy("id", "desc")->take($request->query("total"))->get(), "total" => $images->count()];
+        } else {
+            return Inertia::render("admin/image/images");
+        }
     }
 
     /**
@@ -28,7 +35,47 @@ class ImageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title' => 'nullable|string|max:255',
+            'caption' => 'nullable|string',
+            'alt_text' => 'nullable|string',
+        ]);
+
+        // Get uploaded file
+        $image = $request->file('image');
+
+        // Generate unique file name
+        $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+        // Store the image in storage/app/public/images
+        $image->storeAs('images', $imageName, 'public');
+
+        // Get full path to temp file to read dimensions
+
+
+        $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $imageData = $manager->read($image->getRealPath());
+
+        $width = $imageData->width();
+        $height = $imageData->height();
+        $width = $imageData->width();
+        $height = $imageData->height();
+        // Save to DB
+        Image::create([
+            'user_id'   => $request->user()->id,
+            'file_path' => 'storage/images/' . $imageName,
+            'file_size' => $image->getSize(),
+            'file_name' => $imageName,
+            'file_type' => $image->getClientOriginalExtension(),
+            'caption'   => $request->input('caption'),
+            'alt_text'  => $request->input('alt_text'),
+            'title'     => $request->input('title'),
+            'width'     => $width,
+            'height'    => $height,
+        ]);
+
+        return redirect(route("images.index"))->with('success', 'Image created successfully!');
     }
 
     /**

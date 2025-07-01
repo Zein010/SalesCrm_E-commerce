@@ -24,16 +24,16 @@ return new class extends Migration
 
             // SEO Fields
 
-            $table->string("title");
-            $table->string("alt_text");
-            $table->string("caption");
+            $table->string("title")->nullable();
+            $table->string("alt_text")->nullable();
+            $table->string("caption")->nullable();
 
 
             // Performance Feilds
-            $table->string("thumbnail_medium");
-            $table->string("thumbnail_small");
-            $table->boolean("thumbnailed");
-            $table->boolean("converted");
+            $table->string("thumbnail_medium")->nullable();
+            $table->string("thumbnail_small")->nullable();
+            $table->boolean("thumbnailed")->default(false);
+            $table->boolean("converted")->default(false);
             // Tracking Fields
             $table->integer("user_id");
         });

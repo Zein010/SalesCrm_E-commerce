@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer("item_id");
             $table->integer("image_id");
             $table->integer("user_id");
+            $table->integer("ordering")->default(0);
+            $table->boolean("main_image")->default(0);
         });
     }
 

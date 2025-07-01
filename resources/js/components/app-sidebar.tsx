@@ -31,7 +31,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Images',
-        href: '/Images',
+        href: '/images',
         icon: LayoutGrid,
     },
 ];

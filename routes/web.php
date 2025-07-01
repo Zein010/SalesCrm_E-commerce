@@ -3,6 +3,7 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TagController;
 use App\Models\Client;
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::resource('clients', ClientController::class);
+    Route::resource('images', ImageController::class);
     Route::resource('api/comments', CommentController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('tags', TagController::class);
