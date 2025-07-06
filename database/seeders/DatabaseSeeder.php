@@ -25,10 +25,10 @@ class DatabaseSeeder extends Seeder
         Tag::truncate();
         Item::truncate();
         Client::truncate();
+        User::factory(10)->has(Item::factory(14))->create();
         Category::factory(5)->create();
         Category::factory(10)->create();
         Tag::factory(15)->create();
-        User::factory(10)->has(Item::factory(14))->create();
         Client::factory(10)->create();
         Comment::factory(20)->create();
     }

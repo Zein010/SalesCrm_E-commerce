@@ -13,11 +13,12 @@ class TagController extends Controller
      */
     public function index(Request $request, Tag $tags)
     {
-
-        if ($request->isNotFilled("per_page")) {
-            return Inertia::render('admin/tag/tags');
-        } else {
+        if ($request->filled("all")) {
+            return  Tag::all(["id", "name"]);
+        } else if ($request->filled("per_page")) {
             return  $tags->paginate($request->query("per_page", 10));
+        } else {
+            return Inertia::render('admin/tag/tags');
         }
         //
     }
@@ -39,7 +40,7 @@ class TagController extends Controller
         $validated = $request->validate(["name" => "Required|regex:/^[a-zA-Z0-9_]+$/", "description" => "required",], ["name.regex" => "The name field must contain letters, numbers and _ only"]);
         $validated["user_id"] = $request->user()->id;
         Tag::create($validated);
-        return redirect(route("tags.index"))->with('success', 'tag created successfully!');
+        return redirect()->back();
     }
 
     /**
@@ -62,9 +63,16 @@ class TagController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Tag $tag)
     {
         //
+
+        $request->validate(["name" => "Required|regex:/^[a-zA-Z0-9_]+$/", "description" => "required",], ["name.regex" => "The name field must contain letters, numbers and _ only"]);
+        $tag->name = $request->name;
+        $tag->description = $request->description;
+
+        $tag->save();
+        return redirect(route("tags.index"))->with('success', 'tag updated successfully!');
     }
 
     /**

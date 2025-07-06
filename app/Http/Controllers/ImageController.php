@@ -84,6 +84,7 @@ class ImageController extends Controller
     public function show(Image $image)
     {
         //
+        return $image;
     }
 
     /**
@@ -99,7 +100,51 @@ class ImageController extends Controller
      */
     public function update(Request $request, Image $image)
     {
-        //
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title' => 'nullable|string|max:255',
+            'caption' => 'nullable|string',
+            'alt_text' => 'nullable|string',
+        ]);
+
+        // Get uploaded file
+        $imageFile = $request->file('image');
+
+        // Generate unique file name
+        $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+
+        // Store the image in storage/app/public/images
+        $imageFile->storeAs('images', $imageName, 'public');
+
+        // Get full path to temp file to read dimensions
+
+
+        $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $imageData = $manager->read($imageFile->getRealPath());
+
+        $width = $imageData->width();
+        $height = $imageData->height();
+        $width = $imageData->width();
+        $height = $imageData->height();
+        // Save to DB
+
+        $image->file_path = 'storage/images/' . $imageName;
+        $image->file_size = $imageFile->getSize();
+        $image->file_name = $imageName;
+        $image->file_type = $imageFile->getClientOriginalExtension();
+        $image->caption   = $request->input('caption');
+        $image->alt_text  = $request->input('alt_text');
+        $image->title     = $request->input('title');
+        $image->width     = $width;
+        $image->height    = $height;
+        $image->converted = false;
+        $image->thumbnailed = false;
+        $image->thumbnail_small = null;
+        $image->thumbnail_medium = null;
+
+        $image->save();
+        return redirect(route("images.index"))->with('success', 'Image created successfully!');
     }
 
     /**

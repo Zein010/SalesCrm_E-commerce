@@ -21,12 +21,11 @@ type TagForm = {
     description: string
     id: number
 }
-export function TagEdit({ open, setOpen, id }: { open: boolean, setOpen: any, id: number }) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<TagForm>>({
+export function TagEdit({ open, setOpen, id, setReload }: { open: boolean, setOpen: any, id: number, setReload: any }) {
+    const { data, setData, put, processing, errors, reset } = useForm<Required<TagForm>>({
         id: id,
         name: "",
         description: ""
-
     });
     useEffect(() => {
         if (open) {
@@ -43,8 +42,8 @@ export function TagEdit({ open, setOpen, id }: { open: boolean, setOpen: any, id
     const submit: FormEventHandler = (e) => {
         console.log("sss")
         e.preventDefault();
-        post(route("tags.store"), {
-            onSuccess: () => { toast.success('Tag has been created') },
+        put(route("tags.update", { tag: data.id }), {
+            onSuccess: () => { toast.success('Tag has been edited'); setOpen(false), setReload((old: boolean) => !old) },
             onError: () => { toast.error('Something went wrong') },
         })
     }
@@ -58,7 +57,7 @@ export function TagEdit({ open, setOpen, id }: { open: boolean, setOpen: any, id
                 <DialogContent className="sm:max-w-[425px] gap-2">
                     <form onSubmit={submit} className="gap-2">
                         <DialogHeader className="mb-4">
-                            <DialogTitle>Create Tag</DialogTitle>
+                            <DialogTitle>Edit Tag</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4">
                             <div className="grid gap-3">
@@ -76,7 +75,7 @@ export function TagEdit({ open, setOpen, id }: { open: boolean, setOpen: any, id
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" >Create</Button>
+                            <Button type="submit" >Edit</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

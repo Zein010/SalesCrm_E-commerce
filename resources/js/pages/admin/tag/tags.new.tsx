@@ -19,7 +19,7 @@ type TagForm = {
     name: string
     description: string
 }
-export function TagNew({ open, setOpen }: { open: boolean, setOpen: any }) {
+export function TagNew({ open, setOpen, setReload }: { open: boolean, setOpen: any, setReload: any }) {
     const { data, setData, post, processing, errors, reset } = useForm<Required<TagForm>>({
 
         name: "",
@@ -30,7 +30,7 @@ export function TagNew({ open, setOpen }: { open: boolean, setOpen: any }) {
         console.log("sss")
         e.preventDefault();
         post(route("tags.store"), {
-            onSuccess: () => { toast.success('Tag has been created') },
+            onSuccess: (e) => { toast.success('Tag has been created'), reset(), setOpen(false), setReload((old: boolean) => !old) },
             onError: () => { toast.error('Something went wrong') },
         })
     }

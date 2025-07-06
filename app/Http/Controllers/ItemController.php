@@ -28,6 +28,7 @@ class ItemController extends Controller
     public function create()
     {
         //
+        return Inertia::render("admin/item/items.new");
     }
 
     /**
@@ -36,6 +37,7 @@ class ItemController extends Controller
     public function store(Request $request)
     {
         //
+
     }
 
     /**
@@ -54,8 +56,7 @@ class ItemController extends Controller
     public function edit(Item $item)
     {
         //
-           return Inertia::render('admin/item/edit');
-       
+        return Inertia::render('admin/item/edit');
     }
 
     /**
@@ -64,6 +65,7 @@ class ItemController extends Controller
     public function update(Item $items, Request $request, string $id)
     {
         //
+
     }
 
     /**

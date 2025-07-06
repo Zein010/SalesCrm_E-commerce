@@ -14,15 +14,18 @@ class CategoryController extends Controller
     public function index(Request $request, Category $categories)
     {
 
-        if ($request->isNotFilled("per_page")) {
-            return Inertia::render('admin/category/categories');
-        } else {
+        if ($request->filled("all")) {
+            return Category::all(["id", "name"]);
+        } else if ($request->filled("per_page")) {
+
             $where = [];
             if ($request->filled("parent")) {
 
                 $where["category_id"] = $request->query("parent");
             }
             return  $categories->where($where)->paginate($request->query("per_page", 10));
+        } else {
+            return Inertia::render('admin/category/categories');
         }
         //
     }

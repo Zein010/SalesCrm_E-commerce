@@ -21,17 +21,18 @@ export default function Tags() {
     const [newOpen, setNewOpen] = useState<boolean>(false);
     const [editOpen, setEditOpen] = useState<boolean>(false);
     const [editId, setEditId] = useState<number>(0);
+    const [reload, setReload] = useState<boolean>(false);
     return (
 
         <AppLayout breadcrumbs={breadcrumbs}>
-            <TagNew open={newOpen} setOpen={setNewOpen} />
-            <TagEdit open={editOpen} setOpen={setEditOpen} id={editId} />
+            <TagNew setReload={setReload} open={newOpen} setOpen={setNewOpen} />
+            <TagEdit open={editOpen} setReload={setReload} setOpen={setEditOpen} id={editId} />
             <Head title="Tags" />
 
             <div className=" rounded-xl p-4 overflow-x-auto">
                 <div className="relative p-4  overflow-hidden rounded-xl border border-sidebar-border/70  dark:border-sidebar-border">
                     <Datatable config={{
-                        url: "tags", addSetState: setNewOpen,
+                        url: "tags", addSetState: setNewOpen, reload: reload,
                         columnConf: [
                             { name: "id", selectable: true, visible: false, friendlyName: "ID", filterable: false },
                             {

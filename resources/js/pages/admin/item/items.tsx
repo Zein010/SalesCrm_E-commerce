@@ -19,7 +19,7 @@ export default function Items() {
             <div className=" rounded-xl p-4 overflow-x-auto">
                 <div className="p-4  rounded-xl border border-sidebar-border/70  dark:border-sidebar-border">
                     <Datatable config={{
-                        url: "api/items",
+                        url: "items",
                         columnConf: [
                             { name: "id", selectable: true, visible: false, friendlyName: "ID", filterable: false },
                             { name: "name", visible: true, friendlyName: "Name", filterable: true, },

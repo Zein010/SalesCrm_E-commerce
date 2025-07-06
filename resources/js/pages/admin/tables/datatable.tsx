@@ -16,7 +16,7 @@ import { Link } from "@inertiajs/react"
 
 
 
-export default function Datatable({ config }: { config: { columnConf: any, url: string, addUrl?: string, addSetState?: any } }) {
+export default function Datatable({ config }: { config: { reload?: boolean | null, columnConf: any, url: string, addUrl?: string, addSetState?: any } }) {
   const [paginationParam, setPaginationParam] = useState<{ page: number, per_page: number }>({ page: 1, per_page: 10 });
 
   const [data, setData] = useState({ data: [], last_page: 0, total: 0 });
@@ -28,7 +28,7 @@ export default function Datatable({ config }: { config: { columnConf: any, url: 
       .catch(error => {
         console.error('Error fetching data:', error)
       })
-  }, [paginationParam])
+  }, [paginationParam, config.reload ? null : config.reload])
 
   const [columnFilterOptions, setColumnFilterOptions] = useState<null | { friendlyName: string, value: string }[]>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(

@@ -24,11 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('api/comments', CommentController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('tags', TagController::class);
-    Route::resource('api/items', ItemController::class);
-
-    Route::get('items', function () {
-        return Inertia::render('admin/item/items');
-    })->name('items.page');
+    Route::resource('items', ItemController::class);
 });
 Route::get('/greeting', function () {
     return "hello world";

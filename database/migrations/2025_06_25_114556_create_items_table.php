@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string("description");
             $table->decimal("price", 20, 2);
             $table->decimal("discount", 4, 2);
+            $table->json("variants")->nullable();
             $table->integer("user_id");
         });
     }
